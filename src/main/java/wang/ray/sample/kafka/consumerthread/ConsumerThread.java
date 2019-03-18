@@ -1,5 +1,6 @@
-package com.randy.consumerthread;
+package wang.ray.sample.kafka.consumerthread;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
@@ -12,10 +13,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Author  : RandySun (sunfeng152157@sina.com)
- * Date    : 2017-08-20  16:42
- * Comment :
+ * @author ray
  */
+@Slf4j
 public class ConsumerThread {
 
     private final KafkaConsumer<String, String> consumer;
@@ -24,25 +24,26 @@ public class ConsumerThread {
     private ExecutorService executor;
 
 
-    public ConsumerThread(String brokers, String groupId, String topic){
-        Properties properties = buildKafkaProperty(brokers,groupId);
+    public ConsumerThread(String brokers, String groupId, String topic) {
+        Properties properties = buildKafkaProperty(brokers, groupId);
         this.consumer = new KafkaConsumer<>(properties);
         this.topic = topic;
         this.consumer.subscribe(Arrays.asList(this.topic));
     }
 
-    public void start(int threadNumber){
-        executor = new ThreadPoolExecutor(threadNumber,threadNumber,0L, TimeUnit.MILLISECONDS,
+    public void start(int threadNumber) {
+        executor = new ThreadPoolExecutor(threadNumber, threadNumber, 0L, TimeUnit.MILLISECONDS,
                 new ArrayBlockingQueue<Runnable>(1000), new ThreadPoolExecutor.CallerRunsPolicy());
-        while (true){
-            ConsumerRecords<String,String> consumerRecords = consumer.poll(100);
-            for (ConsumerRecord<String,String> item : consumerRecords){
+        while (true) {
+            ConsumerRecords<String, String> consumerRecords = consumer.poll(100);
+            log.debug("Consumer {} messages", consumerRecords.count());
+            for (ConsumerRecord<String, String> item : consumerRecords) {
                 executor.submit(new ConsumerThreadHandler(item));
             }
         }
     }
 
-    private static Properties buildKafkaProperty(String brokers, String groupId){
+    private static Properties buildKafkaProperty(String brokers, String groupId) {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", brokers);
         properties.put("group.id", groupId);

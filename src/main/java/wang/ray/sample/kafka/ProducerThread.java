@@ -1,26 +1,28 @@
-package com.randy;
+package wang.ray.sample.kafka;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.*;
 
 import java.util.Properties;
 
 /**
- * Author  : RandySun (sunfeng152157@sina.com)
- * Date    : 2017-08-20  11:41
- * Comment :
+ * 生产者
+ *
+ * @author ray
  */
+@Slf4j
 public class ProducerThread implements Runnable {
-    private final Producer<String,String> kafkaProducer;
+    private final Producer<String, String> kafkaProducer;
     private final String topic;
 
-    public ProducerThread(String brokers,String topic){
+    public ProducerThread(String brokers, String topic) {
         Properties properties = buildKafkaProperty(brokers);
         this.topic = topic;
-        this.kafkaProducer = new KafkaProducer<String,String>(properties);
+        this.kafkaProducer = new KafkaProducer<>(properties);
 
     }
 
-    private static Properties buildKafkaProperty(String brokers){
+    private static Properties buildKafkaProperty(String brokers) {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", brokers);
         properties.put("acks", "all");
@@ -30,6 +32,8 @@ public class ProducerThread implements Runnable {
         properties.put("buffer.memory", 33554432);
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        // 自定义分区
+        properties.put("partitioner.class", "com.randy.CustomPartitioner");
         return properties;
     }
 
@@ -37,25 +41,25 @@ public class ProducerThread implements Runnable {
     public void run() {
         System.out.println("start sending message to kafka");
         int i = 0;
-        while (true){
-            String sendMsg = "Producer message number:"+String.valueOf(++i);
-            kafkaProducer.send(new ProducerRecord<String, String>(topic,sendMsg),new Callback(){
+        while (true) {
+            String sendMsg = "Producer message number:" + ++i;
+            kafkaProducer.send(new ProducerRecord<>(topic, sendMsg, sendMsg), new Callback() {
 
                 @Override
                 public void onCompletion(RecordMetadata recordMetadata, Exception e) {
-                    if(e != null){
+                    if (e != null) {
                         e.printStackTrace();
                     }
-                    System.out.println("Producer Message: Partition:"+recordMetadata.partition()+",Offset:"+recordMetadata.offset());
+                    log.info("Producer Message: Partition:" + recordMetadata.partition() + ",Offset:" + recordMetadata.offset());
                 }
             });
             // thread sleep 3 seconds every time
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
-            System.out.println("end sending message to kafka");
+            log.debug("end sending message to kafka");
         }
     }
 }
