@@ -45,14 +45,17 @@ public class ConsumerThread {
 
     private static Properties buildKafkaProperty(String brokers, String groupId) {
         Properties properties = new Properties();
+        // 4个必填
         properties.put("bootstrap.servers", brokers);
         properties.put("group.id", groupId);
+        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        // 选填
         properties.put("enable.auto.commit", "true");
         properties.put("auto.commit.interval.ms", "1000");
         properties.put("session.timeout.ms", "30000");
         properties.put("auto.offset.reset", "earliest");
-        properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
         return properties;
     }
 

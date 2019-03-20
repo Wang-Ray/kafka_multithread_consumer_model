@@ -24,14 +24,16 @@ public class ProducerThread implements Runnable {
 
     private static Properties buildKafkaProperty(String brokers) {
         Properties properties = new Properties();
+        // 3个必填
         properties.put("bootstrap.servers", brokers);
+        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        // 选填
         properties.put("acks", "all");
         properties.put("retries", 0);
         properties.put("batch.size", 16384);
         properties.put("linger.ms", 1);
         properties.put("buffer.memory", 33554432);
-        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         // 自定义分区
         properties.put("partitioner.class", "com.randy.CustomPartitioner");
         return properties;
@@ -43,8 +45,7 @@ public class ProducerThread implements Runnable {
         int i = 0;
         while (true) {
             String sendMsg = "Producer message number:" + ++i;
-            kafkaProducer.send(new ProducerRecord<>(topic, sendMsg, sendMsg), new Callback() {
-
+            kafkaProducer.send(new ProducerRecord<>(topic, sendMsg), new Callback() {
                 @Override
                 public void onCompletion(RecordMetadata recordMetadata, Exception e) {
                     if (e != null) {
