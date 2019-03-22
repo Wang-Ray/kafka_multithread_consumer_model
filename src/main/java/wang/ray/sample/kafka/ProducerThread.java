@@ -35,7 +35,7 @@ public class ProducerThread implements Runnable {
         properties.put("linger.ms", 1);
         properties.put("buffer.memory", 33554432);
         // 自定义分区
-        properties.put("partitioner.class", "com.randy.CustomPartitioner");
+        properties.put("partitioner.class", "wang.ray.sample.kafka.CustomPartitioner");
         return properties;
     }
 
@@ -54,9 +54,8 @@ public class ProducerThread implements Runnable {
                     log.info("Producer Message: Partition:" + recordMetadata.partition() + ",Offset:" + recordMetadata.offset());
                 }
             });
-            // thread sleep 3 seconds every time
             try {
-                Thread.sleep(3000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 log.error(e.getMessage(), e);
             }

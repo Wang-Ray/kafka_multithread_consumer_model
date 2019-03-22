@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author ray
@@ -45,6 +46,11 @@ public class ConsumerThread implements Runnable {
             log.debug("Consumer {} messages", consumerRecords.count());
             for (ConsumerRecord<String, String> item : consumerRecords) {
                 log.info("Consumer Message:" + item.value() + ",Partition:" + item.partition() + ",Offset:" + item.offset());
+                try {
+                    TimeUnit.MILLISECONDS.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

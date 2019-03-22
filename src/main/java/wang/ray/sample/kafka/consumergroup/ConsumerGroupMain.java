@@ -14,7 +14,7 @@ public class ConsumerGroupMain {
         String groupId = "group01";
         String topic = "HelloWorld1";
         // 3个消费者
-        int consumerNumber = 3;
+        int consumerNumber = 6;
 
         Thread producerThread = new Thread(new ProducerThread(brokers, topic));
         producerThread.start();
